@@ -9,16 +9,16 @@ def selectOneFromActiveRecords ():
     """Function to select an active applicant's information from database and return the information to the form.
        This function does not have specific input parameters, but the function will get the applicant's IC number from the IC search panel (expected string).
        Output is either applicant's information (displayed in the form), or a message box that shows the error message (if there is any error message) from the database software. If the applicant does not exist in the
-       database, the form will be left blank."""
+       database or is not active, the form will be left blank. If the applicant's programming language column is empty, the space for programming language will be left blank."""
 
 
     #Set the variables
+
     dataICNumber = entryIC.get()
-    from ValidateData import standardise_applicantICNumber
-    #ValidateData contains code for data validation.
-    #It is used to remove "-" or space from IC number before it is used to query applicant's information in the database.
-    #Source: Part of this project
-    dataICNumber = standardise_applicantICNumber (dataICNumber)
+    #Remove space, "-"
+    dataICNumber = dataICNumber.replace(" ", "")
+    dataICNumber = dataICNumber.replace("-", "")
+
     dataName = None
     dataEmail = None
     dataContactNumber = None
@@ -29,7 +29,7 @@ def selectOneFromActiveRecords ():
     dataPastWorkExperience = None
     dataPastWorkDuration = None
     dataHighestEducation = None
-    dataSoftSkills = None
+    dataSoftSkill = None
 
 
     #Select from database
@@ -45,61 +45,35 @@ def selectOneFromActiveRecords ():
     )
     databaseCursor = database.cursor()
     try:
-        result = databaseCursor.callproc ("SelectOneFromActiveRecords", (dataICNumber, dataName, dataEmail, dataContactNumber, dataPositionApplied, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkills))
-            
-        #Display in the form
+        result = databaseCursor.callproc ("SelectOneFromActiveRecords", (dataICNumber, dataName, dataEmail, dataContactNumber, dataPositionApplied, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill))
 
-        #Name
+        #Clear the form
         entryName.delete(0, END)
-        if result[1] is not None:
-            entryName.insert(0, result[1])
-
-        #Email address
         entryEmail.delete(0, END)
-        if result[2] is not None:
-            entryEmail.insert(0, result[2])
-
-        #Contact number
         entryContact.delete(0, END)
-        if result[3] is not None:
-            entryContact.insert(0, result[3])
-
-        #Position applied
         entryPosition.delete(0, END)
-        if result[4] is not None:
-            entryPosition.insert(0, result[4])
-
-        #Language (written)
         entryLangWrite.delete(0, END)
-        if result[5] is not None:
-            entryLangWrite.insert(0, result[5])
-
-        #Language (spoken)
         entryLangSpoke.delete(0, END)
-        if result[6] is not None:
-            entryLangSpoke.insert(0, result[6])
-
-        #Programming language
         entryCodeLang.delete(0, END)
-        if result[7] is not None:
-            entryCodeLang.insert(0, result[7])
-
-        #Past work experience
         entryWorkExp.delete(0, END)
-        if result[8] is not None:
-            entryWorkExp.insert(0, result[8])
-
-        #Past work duration
         entryDuration.delete(0, END)
-        if result[9] is not None:
-            entryDuration.insert(0, result[9])
-
-        #Highest education
         entryHighestEdu.delete(0, END)
-        if result[10] is not None:
+        entrySoftSkill.delete(0, END) #Still not sure about the "entrySoftSkill" name
+        
+        #Display the applicant's information in the form
+        if result[1] is not None: #All of these column is mandatory
+            entryName.insert(0, result[1])
+            entryEmail.insert(0, result[2])
+            entryContact.insert(0, result[3])
+            entryPosition.insert(0, result[4])
+            entryLangWrite.insert(0, result[5])
+            entryLangSpoke.insert(0, result[6])
+            entryWorkExp.insert(0, result[8])
+            entryDuration.insert(0, result[9])
             entryHighestEdu.insert(0, result[10])
-
-        #Soft skills
+            entrySoftSkill.insert(0, result[11]) #Still not sure about the "entrySoftSkill" name
+        if result[7] is not None: #Applicant's programming language column is not mandatory
+            entryCodeLang.insert(0, result[7])
 
     except mysql.connector.Error as errorMessage:
         from tkinter import messagebox
@@ -119,7 +93,7 @@ def updateRecord ():
    
 
     #Validate data and set the variables
-    from ValidateData import standardise_applicantICNumber, validate_applicantName, standardise_applicantEmail, validate_applicantEmail, standardise_applicantContactNumber, validate_applicantContactNumber, validate_positionApplied, validate_otherData
+    from ValidateData import standardise_applicantICNumber, standardise_applicantEmail, validate_applicantEmail, standardise_applicantContactNumber, validate_applicantContactNumber, validate_otherData
     #ValidateData contains code for data validation.
     #It is used to remove "-" and space from IC number and make sure that the other data is valid before it is updated in the database.
     #Source: Part of this project
@@ -128,13 +102,6 @@ def updateRecord ():
     #IC number
     dataICNumber = entryIC.get()
     dataICNumber = standardise_applicantICNumber (dataICNumber)
-
-    #Name
-    dataName = entryName.get()
-    errorMessage = validate_applicantName (dataName)
-    if errorMessage is not None:
-        messagebox.showinfo("Error", errorMessage)
-        return
 
     #Email address
     dataEmail = entryEmail.get()
@@ -152,22 +119,17 @@ def updateRecord ():
         messagebox.showinfo("Error", errorMessage)
         return
 
-    #Position applied
+    #Name, position applied, language (written), language (spoken), programming language, past work experience, past work duration, highest education, soft skills
+    dataName = entryName.get()
     dataPositionApplied = entryPosition.get()
-    errorMessage = validate_positionApplied (dataPositionApplied)
-    if errorMessage is not None:
-        messagebox.showinfo("Error", errorMessage)
-        return
-
-    #Language(s) (written), language(s) (spoken), programming language(s), past work experience, past work duration, highest education, soft skills
     dataLanguageWritten = entryLangWrite.get()
     dataLanguageSpoken = entryLangSpoke.get()
     dataProgrammingLanguage = entryCodeLang.get()
     dataPastWorkExperience = entryWorkExp.get()
     dataPastWorkDuration = entryDuration.get()
     dataHighestEducation = entryHighestEdu.get()
-    #Soft skills
-    errorMessage = validate_otherData (dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation)
+    dataSoftSkill =  entrySoftSkill.get() #Still not sure about the "entrySoftSkill" name
+    errorMessage = validate_otherData (dataName, dataPositionApplied, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill)
     if errorMessage is not None:
         messagebox.showinfo("Error", errorMessage)
         return
@@ -188,12 +150,12 @@ def updateRecord ():
     )
     databaseCursor = database.cursor()
     try:
-        returnMessage = databaseCursor.callproc ("UpdateRecord", (dataName, dataEmail, dataContactNumber, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataICNumber, dataPositionApplied, outMessage))
+        returnMessage = databaseCursor.callproc ("UpdateRecord", (dataName, dataEmail, dataContactNumber, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill, dataICNumber, dataPositionApplied, outMessage))
         database.commit()
-        if returnMessage[11] == "Record successfully edited":
-            messagebox.showinfo("", returnMessage[11])
+        if returnMessage[12] == "Record successfully edited":
+            messagebox.showinfo("", returnMessage[12])
         else:
-            messagebox.showinfo("Error", returnMessage[11])
+            messagebox.showinfo("Error", returnMessage[12])
     except mysql.connector.Error as errorMessage:
         messagebox.showinfo("Error", errorMessage)
     finally:
@@ -260,7 +222,7 @@ my_canvas.create_window(500, 265, anchor="nw", window=entryIC)
 
 #Search Button
 img_label = Label(image=SearchButtonImg)
-ButtonSave = Button(root, image=SearchButtonImg, borderwidth=0,highlightthickness=0,bd=0,command=searchOneFromActiveRecords)
+ButtonSave = Button(root, image=SearchButtonImg, borderwidth=0,highlightthickness=0,bd=0,command=selectOneFromActiveRecords)
 my_canvas.create_window(1110,252,anchor="nw",window=ButtonSave)
 
 #Edit fill
@@ -293,7 +255,6 @@ my_canvas.create_window(1040, 704, anchor="nw", window=entryDuration)
 
 entryHighestEdu = Entry(root, width = 100)
 my_canvas.create_window(500, 762, anchor="nw", window=entryHighestEdu)
-
 
 #Save Edit Button
 img_label = Label(image=SaveEditButtonImg)
