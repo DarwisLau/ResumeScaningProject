@@ -12,7 +12,7 @@ def insertNewRecord ():
 
     
     #Validate data and set the variables
-    from ValidateData import standardise_applicantICNumber, validate_applicantICNumber, validate_applicantName, standardise_applicantEmail, validate_applicantEmail, standardise_applicantContactNumber, validate_applicantContactNumber, validate_positionApplied, validate_otherData
+    from ValidateData import standardise_applicantICNumber, validate_applicantICNumber, standardise_applicantEmail, validate_applicantEmail, standardise_applicantContactNumber, validate_applicantContactNumber, validate_otherData
     #ValidateData contains code for data validation.
     #It is used to make sure that the data is valid before it is inserted into the database.
     #Source: Part of this project
@@ -22,13 +22,6 @@ def insertNewRecord ():
     dataICNumber = entryIC.get()
     dataICNumber = standardise_applicantICNumber (dataICNumber)
     errorMessage = validate_applicantICNumber (dataICNumber)
-    if errorMessage is not None:
-        messagebox.showinfo("Error", errorMessage)
-        return
-
-    #Name
-    dataName = entryName.get()
-    errorMessage = validate_applicantName (dataName)
     if errorMessage is not None:
         messagebox.showinfo("Error", errorMessage)
         return
@@ -49,22 +42,17 @@ def insertNewRecord ():
         messagebox.showinfo("Error", errorMessage)
         return
 
-    #Position applied
+    #Name, position applied, language (written), language (spoken), programming language, past work experience, past work duration, highest education, soft skill
+    dataName = entryName.get()
     dataPositionApplied = entryPosition.get()
-    errorMessage = validate_positionApplied (dataPositionApplied)
-    if errorMessage is not None:
-        messagebox.showinfo("Error", errorMessage)
-        return
-
-    #Language(s) (written), language(s) (spoken), programming language(s), past work experience, past work duration, highest education, soft skills
     dataLanguageWritten = entryLangWrite.get()
     dataLanguageSpoken = entryLangSpoke.get()
     dataProgrammingLanguage = entryCodeLang.get()
     dataPastWorkExperience = entryWorkExp.get()
     dataPastWorkDuration = entryDuration.get()
     dataHighestEducation = entryHighestEdu.get()
-    #Soft skills
-    errorMessage = validate_otherData (dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation)
+    dataSoftSkill = entrySoftSkill.get() #Still not sure about the "entrySoftSkill" name
+    errorMessage = validate_otherData (dataName, dataPositionApplied, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill)
     if errorMessage is not None:
         messagebox.showinfo("Error", errorMessage)
         return
@@ -85,12 +73,12 @@ def insertNewRecord ():
     )
     databaseCursor = database.cursor()
     try:
-        returnMessage = databaseCursor.callproc ("InsertNewRecord", (dataICNumber, dataName, dataEmail, dataContactNumber, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataPositionApplied, outMessage))
+        returnMessage = databaseCursor.callproc ("InsertNewRecord", (dataICNumber, dataName, dataEmail, dataContactNumber, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill, dataPositionApplied, outMessage))
         database.commit()
-        if returnMessage[11] == "Record successfully added":
-            messagebox.showinfo("", returnMessage[11])
+        if returnMessage[12] == "Record successfully added":
+            messagebox.showinfo("", returnMessage[12])
         else:
-            messagebox.showinfo("Error", returnMessage[11])
+            messagebox.showinfo("Error", returnMessage[12])
     except mysql.connector.Error as errorMessage:
         messagebox.showinfo("Error", errorMessage)
     finally:
@@ -186,7 +174,6 @@ my_canvas.create_window(500, 762, anchor="nw", window=entryHighestEdu)
 img_label = Label(image=SaveButtonImg)
 entryButtonSave = Button(root, image=SaveButtonImg, borderwidth=0, highlightthickness=0, bd=0, command=insertNewRecord)
 my_canvas.create_window(140, 803, anchor="nw", window=entryButtonSave)
-
 
 
 root.mainloop()
