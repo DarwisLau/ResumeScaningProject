@@ -41,28 +41,11 @@ def validate_applicantICNumber (ICNumber):
         except ValueError:
             return "The applicant's IC number is not valid (digit 1-6)."
         #PB
-        list_placeOfBirth = ['01', '02' '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '71', '72', '74', '75', '76', '77', '78', '79', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '98', '99']
+        list_placeOfBirth = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '71', '72', '74', '75', '76', '77', '78', '79', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '98', '99']
         if ICNumber[6:8] not in list_placeOfBirth:
             return "The applicant's IC number is not valid (digit 7-8)."
     else:
         return "The applicant's IC number is not in the correct format (should be YYMMDDPB###G or YYMMDD-PB-###G)."
-
-
-
-def validate_applicantName (name):
-
-    """Function to check if an applicant's name is valid and return error
-       message if the applicant's name is not valid.
-       Input should be string.
-       Output is string or no output.
-       Note: applicantName varchar(200) NOT NULL"""
-
-
-    #Number of characters
-    if len(name) > 200:
-        return "The character limit for applicant's name is 200."
-    elif len(name) == 0:
-        return "Applicant's name must be filled."
 
 
 
@@ -152,7 +135,7 @@ def validate_applicantContactNumber (contactNumber):
             contactNumber = contactNumber.replace("6", "")
 
         #Syntax
-        list_mobilePrefix = ['012', '013', '014', '016', '017', '018', '019']
+        list_mobilePrefix = ['010', '012', '013', '014', '016', '017', '018', '019']
         list_landlinePrefix = ['04', '05', '06', '07', '082', '083', '084', '085', '086', '087', '088', '089', '09']
         if contactNumber[0:3] in ['011', '015'] and len(contactNumber) == 11:
             pass
@@ -167,54 +150,77 @@ def validate_applicantContactNumber (contactNumber):
         else:
             return "The applicant's contact number is not valid."       
 
-        
 
-def validate_positionApplied (positionApplied):
 
-    """Function to check if an position applied is valid and return error
-       message if the applicant's position applied is not valid.
-       Input should be string.
+def validate_otherData (name, positionApplied, languageWritten, languageSpoken, programmingLanguage, pastWorkExperience, pastWorkDuration, highestEducation, softSkills):
+
+    """Function to check if an applicant's name, position applied, language
+       (written), language (spoken), programming language, past work
+       experience, past work duration, highest education, and soft skill are
+       valid and return error message if any of these data is not valid.
+       All 9 inputs should be string.
        Output is string or no output.
-       Note: positionApplied varchar(200) NOT NULL"""
+       Note: applicantName varchar(150) NOT NULL
+             positionApplied varchar(50) NOT NULL
+             applicantLanguageWritten varchar(100) NOT NULL
+             applicantLanguageSpoken varchar(100) NOT NULL
+             applicantProgrammingLanguage varchar(100) NULL
+             appplicantPastWorkExperience varchar(500) NOT NULL
+             applicantPastWorkDuration varchar(30) NOT NULL
+             applicantHighestEducation varchar(100) NOT NULL
+             applicantSoftSkill varchar(100) NOT NULL"""
 
 
     #Number of characters
-    if len(positionApplied) > 200:
-        return "The character limit for applicant's language (written) is 200."
+
+    #Name
+    if len(name) > 150:
+        return "The character limit for applicant's name is 150."
+    elif len(name) == 0:
+        return "Applicant's name must be filled."
+
+    #Position Applied
+    elif len(positionApplied) > 50:
+        return "The character limit for position applied is 50."
     elif len(positionApplied) == 0:
         return "Position applied must be filled."
 
+    #Language (written)
+    elif len(languageWritten) > 100:
+        return "The character limit for applicant's language (written) is 100."
+    elif len(languageWritten) == 0:
+        return "Applicant's language (written) must be filled."
 
+    #Language (spoken)
+    elif len(languageSpoken) > 100:
+        return "The character limit for applicant's language (spoken) is 100."
+    elif len(languageSpoken) == 0:
+        return "Applicant's language (spoken) must be filled."
 
-def validate_otherData (languageWritten, languageSpoken, programmingLanguage, pastWorkExperience, pastWorkDuration, highestEducation):
+    #Programming language
+    elif len(programmingLanguage) > 100:
+        return "The character limit for applicant's programming language is 100."
 
-    """Function to check if an applicant's language(s) (written), language(s)
-       (spoken), programming language(s), past work experience, past work
-       duration, and highest education are valid and return error message if
-       any of these data is not valid.
-       All 6 inputs should be string.
-       Output is string or no output.
-       Note: applicantLanguageWritten varchar(500) NULL
-             applicantLanguageSpoken varchar(500) NULL
-             applicantProgrammingLanguage varchar(500) NULL
-             appplicantPastWorkExperience varchar(3000) NULL
-             applicantPastWorkDuration varchar(300) NULL
-             applicantHighestEducation varchar(800) NULL
-             applicantSoftSkills varchar(1500) NULL"""
+    #Past work experience
+    elif len(pastWorkExperience) > 500:
+        return "The character limit for applicant's past work experience is 500."
+    elif len(pastWorkExperience) == 0:
+        return "Applicant's past work experience must be filled."
 
+    #Past work duration
+    elif len(pastWorkDuration) > 30:
+        return "The character limit for applicant's past work duration is 30."
+    elif len(pastWorkDuration) == 0:
+        return "Applicant's past work duration must be filled."
 
-    #Number of characters
-    if len(languageWritten) > 500:
-        return "The character limit for applicant's language (written) is 500."
-    elif len(languageSpoken) > 500:
-        return "The character limit for applicant's language (spoken) is 500."
-    elif len(programmingLanguage) > 500:
-        return "The character limit for applicant's programming language(s) is 500."
-    elif len(pastWorkExperience) > 3000:
-        return "The character limit for applicant's past work experience is 3000."
-    elif len(pastWorkDuration) > 300:
-        return "The character limit for applicant's past work duration is 300."
-    elif len(highestEducation) > 800:
-        return "The character limit for applicant's highest education is 800."
-    #Soft slills
+    #Highest education
+    elif len(highestEducation) > 100:
+        return "The character limit for applicant's highest education is 100."
+    elif len(highestEducation) == 0:
+        return "Applicant's highest education must be filled."
 
+    #Soft skill
+    elif len(softSkills) > 100:
+        return "The character limit for applicant's soft skill is 100."
+    elif len(softSkills) == 0:
+        return "Applicant's soft skill must be filled."
