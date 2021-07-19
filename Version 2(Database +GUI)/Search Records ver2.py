@@ -1,9 +1,15 @@
 from tkinter import*
 from tkinter import ttk
 from tkinter.font import Font
-import mysql.connector
+from tkinter import messagebox
 from tkinter.ttk import Treeview
 from tkinter.ttk import Scrollbar
+
+import mysql.connector
+#mysql.conector is a driver to access mySQL database.
+#It is used to select active applicant's information, for those who fulfill the criteria, from the database.
+#Source: It is installed together when installing the mySQL software using mySQL installer. Source of the mySQL installer: https://dev.mysql.com/downloads/installer/
+
 
 #Window size, title
 root = Tk()
@@ -199,17 +205,57 @@ SoftSkillbox=Checkbutton(root,text="Soft Skills", variable=SoftSkillVar,command=
 SoftSkillsearch=Entry(root)
 my_canvas.create_window(1630,260,anchor="nw",window=SoftSkillbox)
 
+#Function called by selectFromActiveRecords_AND_OR() function
+def determine_numberOfCriteriaFulfilled(record):
+
+        """Function to determine and return the number of criteria that an applicant fulfilled.
+           Input should be a 12-element list, which is one row of the results the execution of SelectFromActiveRecords procedure in the database.
+           Output is integer."""
+
+        #Determine the number of criteria fulfilled
+        numberOfCriteriaFulfilled = 0
+        if criteriaList[0] is not None and record[5].lower().find(criteriaList[0]) != -1: #languageWritten == dataLanguageWritten_1
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[1] is not None and record[5].lower().find(criteriaList[1]) != -1: #languageWritten == dataLanguageWritten_2
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[2] is not None and record[5].lower().find(criteriaList[2]) != -1: #languageWritten == dataLanguageWritten_3
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[3] is not None and record[6].lower().find(criteriaList[3]) != -1: #languageSpoken == dataLanguageSpoken_1
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[4] is not None and record[6].lower().find(criteriaList[4]) != -1: #languageSpoken == dataLanguageSpoken_2
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[5] is not None and record[6].lower().find(criteriaList[5]) != -1: #languageSpoken == dataLanguageSpoken_3
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[6] is not None and record[7].lower().find(criteriaList[6]) != -1: #programmingLanguage == dataProgrammingLanguage_1
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[7] is not None and record[7].lower().find(criteriaList[7]) != -1: #programmingLanguage == dataProgrammingLanguage_2
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[8] is not None and record[7].lower().find(criteriaList[8]) != -1: #programmingLanguage == dataProgrammingLanguage_3
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[9] is not None and record[8].lower().find(criteriaList[9]) != -1: #pastWorkExperience == dataPastWorkExperience
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[10] is not None and record[10].lower().find(criteriaList[10]) != -1: #highestEducation == dataHighestEducation
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[11] is not None and record[11].lower().find(criteriaList[11]) != -1: #softSkill == dataSoftSkill_1
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[12] is not None and record[11].lower().find(criteriaList[12]) != -1: #softskill == dataSoftSkill_2
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[13] is not None and record[11].lower().find(criteriaList[13]) != -1: #softSkill == dataSoftSkill_3
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[14] is not None and record[11].lower().find(criteriaList[14]) != -1: #softSkill == dataSoftSkill_4
+                numberOfCriteriaFulfilled += 1
+        if criteriaList[15] is not None and record[11].lower().find(criteriaList[15]) != -1: #softSkill == dataSoftSkill_5
+                numberOfCriteriaFulfilled += 1
+        return numberOfCriteriaFulfilled
+
 #Function executed when Search button is pressed
-def selectFromActiveRecords_AND():
-        
-        """Function to select all active applicants that fulfill all the criteria listed by user.
-           This function does not have specific input parameters, but the function will get the on/off status of each checkbox, and if the checkbox is on, the function will get the criteria from the search bar.
-           Output is either one or multiple rows of information of active applicants who fulfill the criteria listed, if one or multiple checkboxes is on; or all active applicants, if none of the checkboxes is on; or a message box that shows an error message (if there is any error message) from thhe database software. If there are no active applicants or none of the active applicants fulfill all the criteria, the table will be left blank."""
+def selectFromActiveRecords():        
 
-        from tkinter import messagebox
+        """Function to select all active applicants that fulfill one of the criteria listed by user.
+           This function does not have specific input parameters, but the function will get the criteria from the search bar.
+           Output is either one or multiple rows of active applicants' information, for those who fulfill one of the criteria; or all active applicants, if all of the search bars is empty; or a message box that shows error message. If there are no active applicants or none of the active applicants fulfill the criteria, the table will be left blank."""
 
-        #Get on/off status of checkbox and criterion from search bar
-        #Name
+        #Get criteria from search bar
         if nameVar.get():
                 dataName = namesearch.get()
                 if len(dataName) > 150:
@@ -218,8 +264,6 @@ def selectFromActiveRecords_AND():
                 dataName = "%" + dataName + "%"
         else:
                 dataName = "%%"
-
-        #IC number
         if ICVar.get():
                 dataICNumber = ICsearch.get()
                 dataICNumber = dataICNumber.replace(" ", "")
@@ -230,8 +274,6 @@ def selectFromActiveRecords_AND():
                 dataICNumber = "%" + dataICNumber + "%"
         else:
                 dataICNumber = "%%"
-
-        #Position applied
         if PosVar.get():
                 dataPositionApplied = Possearch.get()
                 if len(dataPositionApplied) > 50:
@@ -240,12 +282,8 @@ def selectFromActiveRecords_AND():
                 dataPositionApplied = "%" + dataPositionApplied + "%"
         else:
                 dataPositionApplied = "%%"
-
-        #Language (written)
         if WrittenVar.get():
                 keywordLanguageWritten = Writtensearch.get()
-                keywordLanguageWritten = keywordLanguageWritten.replace("AND", ",")
-                keywordLanguageWritten = keywordLanguageWritten.replace("and", ",")
                 keywordLanguageWritten = keywordLanguageWritten.replace(", ", ",")
                 keywordLanguageWritten = keywordLanguageWritten.replace(" ,", ",")
                 listLanguageWritten = keywordLanguageWritten.split(",")
@@ -255,6 +293,7 @@ def selectFromActiveRecords_AND():
                                 return
                 if len(listLanguageWritten) > 3:
                         messagebox.showinfo("Error", "The maximum number of criteria for applicant's language (written) is 3.")
+                        return
                 elif len(listLanguageWritten) == 3:
                         dataLanguageWritten_1 = "%" + listLanguageWritten[0] + "%"
                         dataLanguageWritten_2 = "%" + listLanguageWritten[1] + "%"
@@ -271,12 +310,8 @@ def selectFromActiveRecords_AND():
                 dataLanguageWritten_1 = "%%"
                 dataLanguageWritten_2 = "%%"
                 dataLanguageWritten_3 = "%%"
-
-        #Language (spoken)
         if SpokenVar.get():
                 keywordLanguageSpoken = Spokensearch.get()
-                keywordLanguageSpoken = keywordLanguageSpoken.replace("AND", ",")
-                keywordLanguagespoken = keywordLanguageSpoken.replace("and", ",")
                 keywordLanguageSpoken = keywordLanguageSpoken.replace(", ", ",")
                 keywordLanguageSpoken = keywordLanguageSpoken.replace(" ,", ",")
                 listLanguageSpoken = keywordLanguageSpoken.split(",")
@@ -286,6 +321,7 @@ def selectFromActiveRecords_AND():
                                 return
                 if len(listLanguageSpoken) > 3:
                         messagebox.showinfo("Error", "The maximum number of criteria for applicant's language (spoken) is 3.")
+                        return
                 elif len(listLanguageSpoken) == 3:
                         dataLanguageSpoken_1 = "%" + listLanguageSpoken[0] + "%"
                         dataLanguageSpoken_2 = "%" + listLanguageSpoken[1] + "%"
@@ -302,12 +338,8 @@ def selectFromActiveRecords_AND():
                 dataLanguageSpoken_1 = "%%"
                 dataLanguageSpoken_2 = "%%"
                 dataLanguageSpoken_3 = "%%"
-
-        #Programming language
         if ProgramVar.get():
                 keywordProgrammingLanguage = Programsearch.get()
-                keywordProgrammingLanguage = keywordProgrammingLanguage.replace("AND", ",")
-                keywordProgrammingLanguage = keywordProgrammingLanguage.replace("and", ",")
                 keywordProgrammingLanguage = keywordProgrammingLanguage.replace(", ", ",")
                 keywordProgrammingLanguage = keywordProgrammingLanguage.replace(" ,", ",")
                 listProgrammingLanguage = keywordProgrammingLanguage.split(",")
@@ -317,6 +349,7 @@ def selectFromActiveRecords_AND():
                                 return
                 if len(listProgrammingLanguage) > 3:
                         messagebox.showinfo("Error", "The maximum number of criteria for applicant's programming language is 3.")
+                        return
                 elif len(listProgrammingLanguage) == 3:
                         dataProgrammingLanguage_1 = "%" + listProgrammingLanguage[0] + "%"
                         dataProgrammingLanguage_2 = "%" + listProgrammingLanguage[1] + "%"
@@ -333,8 +366,6 @@ def selectFromActiveRecords_AND():
                 dataProgrammingLanguage_1 = "%%"
                 dataProgrammingLanguage_2 = "%%"
                 dataProgrammingLanguage_3 = "%%"
-
-        #Past work experience
         if ExpVar.get():
                 dataPastWorkExperience = Expsearch.get()
                 if len(dataPastWorkExperience) > 500:
@@ -343,8 +374,6 @@ def selectFromActiveRecords_AND():
                 dataPastWorkExperience = "%" + dataPastWorkExperience + "%"
         else:
                 dataPastWorkExperience = "%%"
-
-        #Highest education
         if EduVar.get():
                 dataHighestEducation = Edusearch.get()
                 if len(dataHighestEducation) >100:
@@ -353,12 +382,8 @@ def selectFromActiveRecords_AND():
                 dataHighestEducation = "%" + dataHighestEducation + "%"
         else:
                 dataHighestEducation = "%%"
-
-        #Soft skills
         if SoftSkillVar.get():
                 keywordSoftSkill = SoftSkillsearch.get()
-                keywordSoftSkill = keywordSoftSkill.replace("AND", ",")
-                keywordSoftSkill = keywordSoftSkill.replace("and", ",")
                 keywordSoftSkill = keywordSoftSkill.replace(", ", ",")
                 keywordSoftSkill = keywordSoftSkill.replace(" ,", ",")
                 listSoftSkill = keywordSoftSkill.split(",")
@@ -368,6 +393,7 @@ def selectFromActiveRecords_AND():
                                 return
                 if len(listSoftSkill) > 5:
                         messagebox.showinfo("Error", "The maximum number of criteria for soft skill is 5.")
+                        return
                 elif len(listSoftSkill) == 5:
                         dataSoftSkill_1 = "%" + listSoftSkill[0] + "%"
                         dataSoftSkill_2 = "%" + listSoftSkill[1] + "%"
@@ -405,6 +431,21 @@ def selectFromActiveRecords_AND():
                 dataSoftSkill_4 = "%%"
                 dataSoftSkill_5 = "%%"
 
+        #List out the criteria and remove"%" so that it can be used for sorting
+        global criteriaList
+        criteriaList = [dataLanguageWritten_1, dataLanguageWritten_2, dataLanguageWritten_3, dataLanguageSpoken_1, dataLanguageSpoken_2, dataLanguageSpoken_3, dataProgrammingLanguage_1, dataProgrammingLanguage_2, dataProgrammingLanguage_3, dataPastWorkExperience, dataHighestEducation, dataSoftSkill_1, dataSoftSkill_2, dataSoftSkill_3, dataSoftSkill_4, dataSoftSkill_5]
+        count = 0
+        while count <= 15:
+                criterion = criteriaList[count]
+                if criterion == "%%":
+                        criterionOriginal = None
+                else:
+                        criterionOriginal = criterion.replace("%", "")
+                        criterionOriginal = criterionOriginal.lower()
+                criteriaList[count] = criterionOriginal
+                count += 1
+        print(criteriaList)
+
         #Select from the database
         database = mysql.connector.connect (
                 host = "localhost",
@@ -414,24 +455,58 @@ def selectFromActiveRecords_AND():
         )
         databaseCursor = database.cursor()
         try:
-                databaseCursor.callproc ("SelectFromActiveRecords_AND", (dataName, dataICNumber, dataPositionApplied, dataLanguageWritten_1, dataLanguageWritten_2, dataLanguageWritten_3, dataLanguageSpoken_1, dataLanguageSpoken_2, dataLanguageSpoken_3, dataProgrammingLanguage_1, dataProgrammingLanguage_2, dataProgrammingLanguage_3, dataPastWorkExperience, dataHighestEducation, dataSoftSkill_1, dataSoftSkill_2, dataSoftSkill_3, dataSoftSkill_4, dataSoftSkill_5))
+                databaseCursor.callproc ("SelectFromActiveRecords", (dataName, dataICNumber, dataPositionApplied, dataLanguageWritten_1, dataLanguageWritten_2, dataLanguageWritten_3, dataLanguageSpoken_1, dataLanguageSpoken_2, dataLanguageSpoken_3, dataProgrammingLanguage_1, dataProgrammingLanguage_2, dataProgrammingLanguage_3, dataPastWorkExperience, dataHighestEducation, dataSoftSkill_1, dataSoftSkill_2, dataSoftSkill_3, dataSoftSkill_4, dataSoftSkill_5))
+
                 #Clear the table
                 for eachRow in my_tree.get_children():
                         my_tree.delete(eachRow)
+
                 #Display in the table
                 for result in databaseCursor.stored_results():
                         rowNumber = 0
-                        for row in result.fetchall():
-                                my_tree.insert(parent="", index="end", iid=rowNumber, text="", values=(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11]))
+                        heightOfTheRow = 20
+                        for row in sorted(result, key = determine_numberOfCriteriaFulfilled, reverse = True):
+
+                                #Display in multiple lines
+                                heightOfRow = 20
+                                characterLimitInLine = [23, 32, None, None, 15, 20, 20, 20, 19, 15, 20, 14]
+                                listCell = []
+                                number = 0
+                                for number in range(number, 12, number+1):
+                                        cell = row[number]
+                                        lenCell = len(cell)
+                                        limit = characterLimitInLine[number]
+                                        if limit is not None and lenCell > limit:
+                                                count = 0
+                                                while len(cell[count:]) > limit:
+                                                        findSpace = cell.rfind(" ", count, count+(limit-1))
+                                                        if findSpace != -1:
+                                                                cell = cell[0:findSpace] + "\n" + cell[findSpace+1:]
+                                                                count = findSpace + 1
+                                                        else:
+                                                                cell = cell[0:count+(limit-1)] + "\n" + cell[count+(limit-1):]
+                                                                count = count + limit
+                                                        heightOfRow += 20
+                                                if heightOfRow > heightOfTheRow:
+                                                        heightOfTheRow = heightOfRow
+                                                heightOfRow = 20
+                                        listCell.append(cell)
+                                
+                                style.configure('Treeview', rowheight=heightOfTheRow)
+                                my_tree.insert(parent="", index="end", iid=rowNumber, text="", values=(listCell[0], listCell[1], listCell[2], listCell[3], listCell[4], listCell[5], listCell[6], listCell[7], listCell[8], listCell[9], listCell[10], listCell[11]))
                                 rowNumber += 1
+
         except mysql.connector.Error as errorMessage:
                 messagebox.showinfo("Error", errorMessage)
         finally:
                 databaseCursor.close()
                 database.close()
 
+#Used for displaying multiple lines
+style = ttk.Style(root)
+
 #Search Button
-ButtonSearch = Button(root, text="Search", borderwidth=0,highlightthickness=0,bd=0,command=selectFromActiveRecords_AND)
+ButtonSearch = Button(root, text="Search", borderwidth=0,highlightthickness=0,bd=0,command=selectFromActiveRecords)
 my_canvas.create_window(1770,290,anchor="nw",window=ButtonSearch)
 
 
