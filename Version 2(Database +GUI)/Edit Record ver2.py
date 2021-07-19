@@ -1,167 +1,16 @@
 from tkinter import*
 from tkinter.font import Font
+from tkinter import messagebox
 
+import mysql.connector
+#mysql.conector is a driver to access mySQL database.
+#It is used to select active applicant's information from the database and update applicant's information in the database.
+#Source: It is installed together when installing the mySQL software using mySQL installer. Source of the mySQL installer: https://dev.mysql.com/downloads/installer/
 
-
-#Function executed when Search Button is pressed
-def selectOneFromActiveRecords ():
-
-    """Function to select an active applicant's information from database and return the information to the form.
-       This function does not have specific input parameters, but the function will get the applicant's IC number from the IC search panel (expected string).
-       Output is either applicant's information (displayed in the form), or a message box that shows the error message (if there is any error message) from the database software. If the applicant does not exist in the
-       database or is not active, the form will be left blank. If the applicant's programming language column is empty, the space for programming language will be left blank."""
-
-
-    #Set the variables
-
-    dataICNumber = entryIC.get()
-    #Remove space, "-"
-    dataICNumber = dataICNumber.replace(" ", "")
-    dataICNumber = dataICNumber.replace("-", "")
-
-    dataName = None
-    dataEmail = None
-    dataContactNumber = None
-    dataPositionApplied = None
-    dataLanguageWritten = None
-    dataLanguageSpoken = None
-    dataProgrammingLanguage = None
-    dataPastWorkExperience = None
-    dataPastWorkDuration = None
-    dataHighestEducation = None
-    dataSoftSkill = None
-
-
-    #Select from database
-    import mysql.connector
-    #mysql.conector is a driver to access mySQL database.
-    #It is used to query applicant's information in the database, and get the result of the query.
-    #Source: It is installed together when installing the mySQL software using mySQL installer. Source of the mySQL installer: https://dev.mysql.com/downloads/installer/
-    database = mysql.connector.connect (
-        host = "localhost",
-        user = "Resume_Scanning_Project_Admin",
-        password = "AbcdeF,123456!",
-        database = "ResumeScanningProject"
-    )
-    databaseCursor = database.cursor()
-    try:
-        result = databaseCursor.callproc ("SelectOneFromActiveRecords", (dataICNumber, dataName, dataEmail, dataContactNumber, dataPositionApplied, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill))
-
-        #Clear the form
-        entryName.delete(0, END)
-        entryEmail.delete(0, END)
-        entryContact.delete(0, END)
-        entryPosition.delete(0, END)
-        entryLangWrite.delete(0, END)
-        entryLangSpoke.delete(0, END)
-        entryCodeLang.delete(0, END)
-        entryWorkExp.delete(0, END)
-        entryDuration.delete(0, END)
-        entryHighestEdu.delete(0, END)
-        entrySoftSkill.delete(0, END) #Still not sure about the "entrySoftSkill" name
-        
-        #Display the applicant's information in the form
-        if result[1] is not None: #All of these column is mandatory
-            entryName.insert(0, result[1])
-            entryEmail.insert(0, result[2])
-            entryContact.insert(0, result[3])
-            entryPosition.insert(0, result[4])
-            entryLangWrite.insert(0, result[5])
-            entryLangSpoke.insert(0, result[6])
-            entryWorkExp.insert(0, result[8])
-            entryDuration.insert(0, result[9])
-            entryHighestEdu.insert(0, result[10])
-            entrySoftSkill.insert(0, result[11]) #Still not sure about the "entrySoftSkill" name
-        if result[7] is not None: #Applicant's programming language column is not mandatory
-            entryCodeLang.insert(0, result[7])
-
-    except mysql.connector.Error as errorMessage:
-        from tkinter import messagebox
-        messagebox.showinfo("Error", errorMessage)
-    finally:
-        databaseCursor.close()
-        database.close()
-
-
-
-#Function executed when Save Edit Button is pressed
-def updateRecord ():
-
-    """Function to update record in the database.
-       This function does not have specific input parameters, but the functio will get the applicant's information from the form.
-       Output is a message box that shows the message "Record successfully edited" if the update was successful, or promts error message if the update was not successful."""
-   
-
-    #Validate data and set the variables
-    from ValidateData import standardise_applicantICNumber, standardise_applicantEmail, validate_applicantEmail, standardise_applicantContactNumber, validate_applicantContactNumber, validate_otherData
-    #ValidateData contains code for data validation.
-    #It is used to remove "-" and space from IC number and make sure that the other data is valid before it is updated in the database.
-    #Source: Part of this project
-    from tkinter import messagebox
-    
-    #IC number
-    dataICNumber = entryIC.get()
-    dataICNumber = standardise_applicantICNumber (dataICNumber)
-
-    #Email address
-    dataEmail = entryEmail.get()
-    dataEmail = standardise_applicantEmail (dataEmail)
-    errorMessage = validate_applicantEmail (dataEmail)
-    if errorMessage is not None:
-        messagebox.showinfo("Error", errorMessage)
-        return
-
-    #Contact number
-    dataContactNumber = entryContact.get()
-    dataContactNumber = standardise_applicantContactNumber (dataContactNumber)
-    errorMessage = validate_applicantContactNumber (dataContactNumber)
-    if errorMessage is not None:
-        messagebox.showinfo("Error", errorMessage)
-        return
-
-    #Name, position applied, language (written), language (spoken), programming language, past work experience, past work duration, highest education, soft skills
-    dataName = entryName.get()
-    dataPositionApplied = entryPosition.get()
-    dataLanguageWritten = entryLangWrite.get()
-    dataLanguageSpoken = entryLangSpoke.get()
-    dataProgrammingLanguage = entryCodeLang.get()
-    dataPastWorkExperience = entryWorkExp.get()
-    dataPastWorkDuration = entryDuration.get()
-    dataHighestEducation = entryHighestEdu.get()
-    dataSoftSkill =  entrySoftSkill.get() #Still not sure about the "entrySoftSkill" name
-    errorMessage = validate_otherData (dataName, dataPositionApplied, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill)
-    if errorMessage is not None:
-        messagebox.showinfo("Error", errorMessage)
-        return
-
-    outMessage = None
-
-
-    #Update in database
-    import mysql.connector
-    #mysql.conector is a driver to access mySQL database.
-    #It is used to update applicant's information in the database, and check whether the update was successful or not.
-    #Source: It is installed together when installing the mySQL software using mySQL installer. Source of the mySQL installer: https://dev.mysql.com/downloads/installer/
-    database = mysql.connector.connect (
-        host = "localhost",
-        user = "Resume_Scanning_Project_Admin",
-        password = "AbcdeF,123456!",
-        database = "ResumeScanningProject"
-    )
-    databaseCursor = database.cursor()
-    try:
-        returnMessage = databaseCursor.callproc ("UpdateRecord", (dataName, dataEmail, dataContactNumber, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill, dataICNumber, dataPositionApplied, outMessage))
-        database.commit()
-        if returnMessage[12] == "Record successfully edited":
-            messagebox.showinfo("", returnMessage[12])
-        else:
-            messagebox.showinfo("Error", returnMessage[12])
-    except mysql.connector.Error as errorMessage:
-        messagebox.showinfo("Error", errorMessage)
-    finally:
-        databaseCursor.close()
-        database.close()
-
+from ValidateData import standardise_applicantICNumber, validate_applicantICNumber, standardise_applicantEmail, validate_applicantEmail, standardise_applicantContactNumber, validate_applicantContactNumber, validate_otherData
+#ValidateData contains code for data validation.
+#It is used to make sure that data is valid before it is pased into the database, to select or update active applicant's information.
+#Source: Part of this project
 
 
 #Window size, title
@@ -173,7 +22,6 @@ root.title("Edit Record")
 #Define image for Background and button
 bg= PhotoImage(file='D:/GUI Image/background.png')
 SaveEditButtonImg =PhotoImage(file='D:/GUI Image/save edit button.png')
-BackToMenuButtonImg =PhotoImage(file='D:/GUI Image/Back to menu.png')
 SearchButtonImg = PhotoImage(file='D:/GUI Image/search button.png')
 
 #Background
@@ -220,6 +68,52 @@ my_canvas.create_text(140,749,anchor="nw", text="Highest Education:", font=FillF
 entryIC = Entry(root, width = 100)
 my_canvas.create_window(500, 265, anchor="nw", window=entryIC)
 
+#Function executed when Search Button is pressed
+def selectOneFromActiveRecords ():
+
+    """Function to select an active applicant's information from database and return the information to the blank spaces.
+       This function does not have specific input parameters, but the function will get the applicant's IC number from the IC search panel (expected string).
+       Output is either applicant's information (displayed in the entries), or a message box that shows the error message from the database software. If the applicant does not exist in the
+       database or is not active, then all blank spaces will not be fiiled."""
+
+    #Clear the entries
+    entryList = [entryName, entryEmail, entryContact, entryPosition, entryLangWrite, entryLangSpoke, entryCodeLang, entryWorkExp, entryDuration, entryHighestEdu, entrySoftSkills]
+    for entry in entryList:
+        entry.delete(0, END)
+
+    #Get and validate IC number
+    dataICNumber = entryIC.get()
+    dataICNumber = standardise_applicantICNumber (dataICNumber)
+    errorMessage = validate_applicantICNumber (dataICNumber)
+    if errorMessage is not None:
+        messagebox.showinfo("Error", errorMessage)
+        return
+
+    #Select from database
+    database = mysql.connector.connect (
+        host = "localhost",
+        user = "Resume_Scanning_Project_Admin",
+        password = "AbcdeF,123456!",
+        database = "ResumeScanningProject"
+    )
+    databaseCursor = database.cursor()
+    try:
+        databaseCursor.callproc ("SelectOneFromActiveRecords", (dataICNumber,))
+
+        #Display the applicant's information in the entries
+        index = 0
+        for result in databaseCursor.stored_results():
+            for row in result.fetchall():
+                while index <= 10:
+                    entryList[index].insert(0, row[index])
+                    index += 1
+
+    except mysql.connector.Error as errorMessage:
+        messagebox.showinfo("Error", errorMessage)
+    finally:
+        databaseCursor.close()
+        database.close()
+
 #Search Button
 img_label = Label(image=SearchButtonImg)
 ButtonSave = Button(root, image=SearchButtonImg, borderwidth=0,highlightthickness=0,bd=0,command=selectOneFromActiveRecords)
@@ -256,11 +150,76 @@ my_canvas.create_window(1040, 704, anchor="nw", window=entryDuration)
 entryHighestEdu = Entry(root, width = 100)
 my_canvas.create_window(500, 762, anchor="nw", window=entryHighestEdu)
 
+entrySoftSkills = Entry(root,width = 100)
+my_canvas.create_window(500, 820, anchor="nw", window=entrySoftSkills)
+
+#Function executed when Save Edit Button is pressed
+def updateRecord ():
+
+    """Function to update applicant's information in the database.
+       This function does not have specific input parameters, but the functio will get the applicant's information from the entries.
+       Output is a message box that shows the message "Record successfully edited" if the update was successful, or a message box that promts error message if the update was not successful."""
+
+    #Get data, validate data and set the variables
+    dataICNumber = entryIC.get()
+    dataICNumber = standardise_applicantICNumber (dataICNumber)
+    errorMessage = validate_applicantICNumber (dataICNumber)
+    if errorMessage is not None:
+        messagebox.showinfo("Error", errorMessage)
+        return
+    dataEmail = entryEmail.get()
+    dataEmail = standardise_applicantEmail (dataEmail)
+    errorMessage = validate_applicantEmail (dataEmail)
+    if errorMessage is not None:
+        messagebox.showinfo("Error", errorMessage)
+        return
+    dataContactNumber = entryContact.get()
+    dataContactNumber = standardise_applicantContactNumber (dataContactNumber)
+    errorMessage = validate_applicantContactNumber (dataContactNumber)
+    if errorMessage is not None:
+        messagebox.showinfo("Error", errorMessage)
+        return
+    dataName = entryName.get()
+    dataPositionApplied = entryPosition.get()
+    dataLanguageWritten = entryLangWrite.get()
+    dataLanguageSpoken = entryLangSpoke.get()
+    dataProgrammingLanguage = entryCodeLang.get()
+    dataPastWorkExperience = entryWorkExp.get()
+    dataPastWorkDuration = entryDuration.get()
+    dataHighestEducation = entryHighestEdu.get()
+    dataSoftSkill =  entrySoftSkills.get()
+    errorMessage = validate_otherData (dataName, dataPositionApplied, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill)
+    if errorMessage is not None:
+        messagebox.showinfo("Error", errorMessage)
+        return
+    outMessage = None
+
+    #Update in database
+    database = mysql.connector.connect (
+        host = "localhost",
+        user = "Resume_Scanning_Project_Admin",
+        password = "AbcdeF,123456!",
+        database = "ResumeScanningProject"
+    )
+    databaseCursor = database.cursor()
+    try:
+        returnMessage = databaseCursor.callproc ("UpdateRecord", (dataICNumber, dataName, dataEmail, dataContactNumber, dataLanguageWritten, dataLanguageSpoken, dataProgrammingLanguage, dataPastWorkExperience, dataPastWorkDuration, dataHighestEducation, dataSoftSkill, dataPositionApplied, outMessage))
+        database.commit()
+        if returnMessage[12] == "Record successfully edited":
+            messagebox.showinfo("", returnMessage[12])
+        else:
+            messagebox.showinfo("Error", returnMessage[12])
+    except mysql.connector.Error as errorMessage:
+        messagebox.showinfo("Error", errorMessage)
+    finally:
+        databaseCursor.close()
+        database.close()
+
+
 #Save Edit Button
 img_label = Label(image=SaveEditButtonImg)
 ButtonSaveEdit = Button(root, image=SaveEditButtonImg, borderwidth=0, highlightthickness=0, bd=0, command=updateRecord)
 my_canvas.create_window(140, 803, anchor="nw", window=ButtonSaveEdit)
-
 
 
 root.mainloop()
