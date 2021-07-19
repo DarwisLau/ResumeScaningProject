@@ -1,3 +1,5 @@
+#This file contains the dummy data in the database
+
 INSERT INTO Applicant (
 applicantICNumber, applicantName, applicantEmail, applicantContactNumber, applicantLanguageWritten, applicantLanguageSpoken, applicantProgrammingLanguage, applicantPastWorkExperience, applicantPastWorkDuration, applicantHighestEducation, applicantSoftSkill)
 VALUES (
@@ -15,24 +17,6 @@ INSERT INTO Application (
 positionApplied, applicantID)
 VALUES (
 'Software engineer', (SELECT applicantID FROM Applicant WHERE applicantICNumber = '000203072345'));
-
-INSERT INTO Applicant (
-applicantICNumber, applicantName, applicantEmail, applicantContactNumber, applicantLanguageWritten, applicantLanguageSpoken, applicantProgrammingLanguage, applicantPastWorkExperience, applicantPastWorkDuration, applicantHighestEducation, applicantSoftSkill)
-VALUES (
-'', '', '', '', '', '', '', '', '', '', '');
-INSERT INTO Application (
-positionApplied, applicantID)
-VALUES (
-'', (SELECT applicantID FROM Applicant WHERE applicantICNumber = ''));
-
-INSERT INTO Applicant (
-applicantICNumber, applicantName, applicantEmail, applicantContactNumber, applicantLanguageWritten, applicantLanguageSpoken, applicantProgrammingLanguage, applicantPastWorkExperience, applicantPastWorkDuration, applicantHighestEducation, applicantSoftSkill)
-VALUES (
-'', '', '', '', '', '', '', '', '', '', '');
-INSERT INTO Application (
-positionApplied, applicantID)
-VALUES (
-'', (SELECT applicantID FROM Applicant WHERE applicantICNumber = ''));
 
 INSERT INTO Applicant (
 applicantICNumber, applicantName, applicantEmail, applicantContactNumber, applicantLanguageWritten, applicantLanguageSpoken, applicantProgrammingLanguage, applicantPastWorkExperience, applicantPastWorkDuration, applicantHighestEducation, applicantSoftSkill)
@@ -123,3 +107,21 @@ INSERT INTO Application (
 positionApplied, applicantID)
 VALUES (
 'Data analyst', (SELECT applicantID FROM Applicant WHERE applicantICNumber = '001213074321'));
+
+INSERT INTO Applicant (
+applicantICNumber, applicantName, applicantEmail, applicantContactNumber, applicantLanguageWritten, applicantLanguageSpoken, applicantProgrammingLanguage, applicantPastWorkExperience, applicantPastWorkDuration, applicantHighestEducation, applicantSoftSkill)
+VALUES (
+'001231071111', 'Sim Chun Teik', 'chunteiksim@gmail.com', '0161616666', 'English, Malay, Chinese', 'English, Malay, Chinese, Indonesian, Dialect Hokkien', 'Python, Java', 'Programmer (SCT Software Development Sdn. Bhd.), 1/1/2020-20/6/2021', '1 year 5 months 20 days', 'Diploma of Programming, TCS College, Penang (2020)', 'Teamwork,active, conflict resolution, friendly');
+INSERT INTO Application (
+positionApplied, applicantID)
+VALUES (
+'Software Engineer', (SELECT applicantID FROM Applicant WHERE applicantICNumber = '001231071111'));
+
+INSERT INTO Applicant (
+applicantICNumber, applicantName, applicantEmail, applicantContactNumber, applicantLanguageWritten, applicantLanguageSpoken, applicantProgrammingLanguage, applicantPastWorkExperience, applicantPastWorkDuration, applicantHighestEducation, applicantSoftSkill)
+VALUES (
+'011231073333', 'Stephen Ooi Boon Keat', 'stephenboonkeatooi@gmail.com', '0171717777', 'English, Malay, Chinese', 'English, Malay, Chinese, Indonesian, Dialect Hokkien', '', 'Fresh graduate', 'Fresh graduate', 'Diploma of Accounting, OBK College, Penang (2021)', 'Teamwork, energetic, friendly, decisive');
+INSERT INTO Application (
+positionApplied, applicantID)
+VALUES (
+'Accountant', (SELECT applicantID FROM Applicant WHERE applicantICNumber = '011231073333'));
