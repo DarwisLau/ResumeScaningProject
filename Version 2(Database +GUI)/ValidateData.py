@@ -1,6 +1,9 @@
 """This file contains code for data validation."""
 
-
+from validate_email import validate_email
+        #Validate_email is a package for Python that check if an email is valid, properly formatted and really exists.
+        #It is used to check the syntax of the applicant's email address.
+        #Source: https://pypi.org/project/validate_email/
 
 def standardise_applicantICNumber (ICNumber):
 
@@ -9,13 +12,11 @@ def standardise_applicantICNumber (ICNumber):
        Input should be string.
        Output is string."""
 
-
     #Remove space, "-"
     ICNumber = ICNumber.replace(" ", "")
     ICNumber = ICNumber.replace("-", "")
 
     return ICNumber
-
 
 
 def validate_applicantICNumber (ICNumber):
@@ -26,7 +27,6 @@ def validate_applicantICNumber (ICNumber):
        Output is string or no output.
        Note: applicantICNumber char(12) UNIQUE NOT NULL
        Valid format: YYMMDDPB###G, YYMMDD-PB-###G"""
-
 
     #Number of characters
     if len(ICNumber) == 0:
@@ -48,7 +48,6 @@ def validate_applicantICNumber (ICNumber):
         return "The applicant's IC number is not in the correct format (should be YYMMDDPB###G or YYMMDD-PB-###G)."
 
 
-
 def standardise_applicantEmail (email):
 
     """Function to standardise applicants's email addresses, because each
@@ -56,12 +55,10 @@ def standardise_applicantEmail (email):
        Input should be string.
        Output is string."""
 
-
     #Remove space (front and back)
     email = email.strip()
 
     return email
-
 
 
 def validate_applicantEmail (email):
@@ -72,7 +69,6 @@ def validate_applicantEmail (email):
        Output is string or no output.
        Note: applicantEmail varchar(150) UNIQUE NOT NULL"""
 
-
     #Number of characters
     if len(email) > 150:
         return "The character limit for applicant's email address is 150."
@@ -81,13 +77,8 @@ def validate_applicantEmail (email):
 
     #Syntax
     else:
-        from validate_email import validate_email
-        #Validate_email is a package for Python that check if an email is valid, properly formatted and really exists.
-        #It is used to check the syntax of the applicant's email address.
-        #Source: https://pypi.org/project/validate_email/
         if validate_email(email) == False:
             return "The syntax of the applicant's email address is not correct."
-
 
 
 def standardise_applicantContactNumber (contactNumber):
@@ -97,7 +88,6 @@ def standardise_applicantContactNumber (contactNumber):
        Input should be string.
        Output is string."""
 
-    
     #Remove "+", "(", ")", "-", space, country code
     contactNumber = contactNumber.replace(" ", "")
     contactNumber = contactNumber.replace("-", "")
@@ -110,7 +100,6 @@ def standardise_applicantContactNumber (contactNumber):
     return contactNumber
 
 
-
 def validate_applicantContactNumber (contactNumber):
     
     """Function to check if an applicant's contact number is valid and return
@@ -119,22 +108,12 @@ def validate_applicantContactNumber (contactNumber):
        Output is string or no output.
        Note: applicantContactNumber varchar(11) UNIQUE NOT NULL"""
 
-
     #Number of characters
     if len(contactNumber) == 0:
         return "Applicant's contact number must be filled."
 
+    #Syntax
     else:
-        #Remove symbol, space, country code
-        contactNumber = contactNumber.replace(" ", "")
-        contactNumber = contactNumber.replace("-", "")
-        contactNumber = contactNumber.replace("+", "")
-        contactNumber = contactNumber.replace("(", "")
-        contactNumber = contactNumber.replace(")", "")
-        if contactNumber[0:1] == "6":
-            contactNumber = contactNumber.replace("6", "")
-
-        #Syntax
         list_mobilePrefix = ['010', '012', '013', '014', '016', '017', '018', '019']
         list_landlinePrefix = ['04', '05', '06', '07', '082', '083', '084', '085', '086', '087', '088', '089', '09']
         if contactNumber[0:3] in ['011', '015'] and len(contactNumber) == 11:
@@ -149,7 +128,6 @@ def validate_applicantContactNumber (contactNumber):
             pass
         else:
             return "The applicant's contact number is not valid."       
-
 
 
 def validate_otherData (name, positionApplied, languageWritten, languageSpoken, programmingLanguage, pastWorkExperience, pastWorkDuration, highestEducation, softSkills):
@@ -169,7 +147,6 @@ def validate_otherData (name, positionApplied, languageWritten, languageSpoken, 
              applicantPastWorkDuration varchar(30) NOT NULL
              applicantHighestEducation varchar(100) NOT NULL
              applicantSoftSkill varchar(100) NOT NULL"""
-
 
     #Number of characters
 
