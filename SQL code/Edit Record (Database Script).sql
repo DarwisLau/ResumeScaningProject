@@ -1,18 +1,7 @@
 DELIMITER //
 
 CREATE PROCEDURE SelectOneFromActiveRecords (
-IN dataApplicantICNumber char(12),
-OUT dataApplicantName varchar(150),
-OUT dataApplicantEmail varchar(150),
-OUT dataApplicantContactNumber varchar(11),
-OUT dataPositionApplied varchar(50),
-OUT dataApplicantLanguageWritten varchar(100),
-OUT dataApplicantLanguageSpoken varchar(100),
-OUT dataApplicantProgrammingLanguage varchar(100),
-OUT dataApplicantPastWorkExperience varchar(500),
-OUT dataApplicantPastWorkDuration varchar(30),
-OUT dataApplicantHighestEducation varchar(100),
-OUT dataApplicantSoftSkill varchar(100)
+IN dataApplicantICNumber char(12)
 )
 
 #Procedure to select an active applicant's information.
@@ -20,98 +9,28 @@ OUT dataApplicantSoftSkill varchar(100)
 
 BEGIN
 
-#Name
-SET dataApplicantName = (
-  SELECT a.applicantName
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Email address
-SET dataApplicantEmail = (
-  SELECT a.applicantEmail
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Contact number
-SET dataApplicantContactNumber = (
-  SELECT a.applicantContactNumber
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Position applied
-SET dataPositionApplied = (
-  SELECT n.positionApplied
-    FROM Application n, Applicant a
+SELECT a.applicantName,
+  a.applicantEmail,
+  a.applicantContactNumber,
+  n.positionApplied,
+  a.applicantLanguageWritten,
+  a.applicantLanguageSpoken,
+  a.applicantProgrammingLanguage,
+  a.applicantPastWorkExperience,
+  a.applicantPastWorkDuration,
+  a.applicantHighestEducation,
+  a.applicantSoftSkill
+  FROM Applicant a
+  INNER JOIN Application n
+  ON a.applicantID = n.applicantID
     WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Language (written)
-SET dataApplicantLanguageWritten = (
-  SELECT a.applicantLanguageWritten
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Language (spoken)
-SET dataApplicantLanguageSpoken = (
-  SELECT a.applicantLanguageSpoken
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Programming language
-SET dataApplicantProgrammingLanguage = (
-  SELECT a.applicantProgrammingLanguage
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Past work experience
-SET dataApplicantPastWorkExperience = (
-  SELECT a.applicantPastWorkExperience
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Past work duration
-SET dataApplicantPastWorkDuration = (
-  SELECT a.applicantPastWorkDuration
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Highest education
-SET dataApplicantHighestEducation = (
-  SELECT a.applicantHighestEducation
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
-
-#Soft skill
-SET dataApplicantSoftSkill = (
-  SELECT a.applicantSoftSkill
-    FROM Applicant a, Application n
-	WHERE a.applicantICNumber = dataApplicantICNumber AND
-      n.isActive = 1 AND
-      a.applicantID = n.applicantID);
+      n.isActive = 1;
 
 END //
 
 
 CREATE PROCEDURE UpdateRecord (
+IN dataApplicantICNumber char(12),
 IN dataApplicantName varchar(150),
 IN dataApplicantEmail varchar(150),
 IN dataApplicantContactNumber varchar(11),
@@ -122,7 +41,6 @@ IN dataApplicantPastWorkExperience varchar(500),
 IN dataApplicantPastWorkDuration varchar(30),
 IN dataApplicantHighestEducation varchar(100),
 IN dataApplicantSoftSkill varchar(100),
-IN dataApplicantICNumber char(12),
 IN dataApplicationPositionApplied varchar(50),
 OUT message varchar(50)
 )
@@ -138,37 +56,34 @@ IF ((SELECT EXISTS
        FROM Applicant
        WHERE applicantICNumber = dataApplicantICNumber)) = 0)
 THEN
-  SET message = "The applicant does not exists.";
+  SET message = "The applicant does not exist.";
 
 #Check whether the applicant is active or not
 ELSEIF ((SELECT n.isActive
-         FROM Application n, Applicant a
-         WHERE a.applicantICNumber = dataApplicantICNumber AND
-           n.applicantID = a.applicantID) = 0)
+         FROM Application n
+         INNER JOIN Applicant a
+         ON n.applicantID = a.applicantID
+         WHERE a.applicantICNumber = dataApplicantICNumber) = 0)
 THEN
   SET message = "The applicant is not active.";
 
 #Update the record
 ELSE
-UPDATE Applicant
-  SET applicantName = dataApplicantName,
-    applicantEmail = dataApplicantEmail,
-    applicantContactNumber = dataApplicantContactNumber,
-    applicantLanguageWritten = dataApplicantLanguageWritten,
-    applicantLanguageSpoken = dataApplicantLanguageSpoken,
-    applicantProgrammingLanguage = dataApplicantProgrammingLanguage,
-    applicantPastWorkExperience = dataApplicantPastWorkExperience,
-    applicantPastWorkDuration = dataApplicantPastWorkDuration,
-    applicantHighestEducation = dataApplicantHighestEducation,
-    applicantSoftSkill = dataApplicantSoftSkill
-  WHERE applicantICNumber = dataApplicantICNumber;
-
-UPDATE Application
-  SET positionApplied = dataApplicationPositionApplied
-  WHERE applicantID = (
-    SELECT applicantID 
-    FROM Applicant
-    WHERE applicantICNumber = dataApplicantICNumber);
+UPDATE Applicant a
+INNER JOIN Application n
+ON a.applicantID = n.applicantID
+  SET a.applicantName = dataApplicantName,
+    a.applicantEmail = dataApplicantEmail,
+    a.applicantContactNumber = dataApplicantContactNumber,
+    a.applicantLanguageWritten = dataApplicantLanguageWritten,
+    a.applicantLanguageSpoken = dataApplicantLanguageSpoken,
+    a.applicantProgrammingLanguage = dataApplicantProgrammingLanguage,
+    a.applicantPastWorkExperience = dataApplicantPastWorkExperience,
+    a.applicantPastWorkDuration = dataApplicantPastWorkDuration,
+    a.applicantHighestEducation = dataApplicantHighestEducation,
+    a.applicantSoftSkill = dataApplicantSoftSkill,
+    n.positionApplied = dataApplicationPositionApplied
+  WHERE a.applicantICNumber = dataApplicantICNumber;
 
 #Check whether the update was successful or not
 IF ((SELECT applicantName FROM Applicant WHERE applicantICNumber = dataApplicantICNumber) = dataApplicantName) AND
@@ -181,10 +96,9 @@ IF ((SELECT applicantName FROM Applicant WHERE applicantICNumber = dataApplicant
   ((SELECT applicantPastWorkDuration FROM Applicant WHERE applicantICNumber = dataApplicantICNumber) = dataApplicantPastWorkDuration) AND
   ((SELECT applicantHighestEducation FROM Applicant WHERE applicantICNumber = dataApplicantICNumber) = dataApplicantHighestEducation) AND
   ((SELECT applicantSoftSkill FROM Applicant WHERE applicantICNumber = dataApplicantICNumber) = dataApplicantSoftSkill) AND
-  ((SELECT positionApplied FROM Application WHERE applicantID = (SELECT applicantID FROM Applicant WHERE applicantICNumber = dataApplicantICNumber)) = dataApplicationPositionApplied)
+  ((SELECT positionApplied FROM Application n INNER JOIN Applicant a ON n.applicantID = a.applicantID WHERE a.applicantICNumber = dataApplicantICNumber) = dataApplicationPositionApplied)
 THEN
   SET message = "Record successfully edited";
-  
 ELSE 
   SET message = "Something wrong when updating the record in the database.";
 END IF;
