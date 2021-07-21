@@ -21,7 +21,7 @@ def click_search_record():
 root = Tk()
 root.geometry('1920x1080')
 root.maxsize(1920,1080)
-root.title("Add Record")
+root.title("Main Menu")
 
 #Define image for Background and button
 bg= PhotoImage(file='D:/GUI Image/background.png')
