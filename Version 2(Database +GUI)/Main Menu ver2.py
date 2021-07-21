@@ -13,7 +13,7 @@ def click_edit_record():
 def click_archive_record():
 	call(["python",'Archive record ver2.py'])
 def click_search_record():
-	call(["python","search record test.py"])
+	call(["python","Search Record ver2.py"])
 
 
 
