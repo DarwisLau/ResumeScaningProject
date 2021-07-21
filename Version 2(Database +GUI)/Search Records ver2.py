@@ -444,7 +444,6 @@ def selectFromActiveRecords():
                         criterionOriginal = criterionOriginal.lower()
                 criteriaList[count] = criterionOriginal
                 count += 1
-        print(criteriaList)
 
         #Select from the database
         database = mysql.connector.connect (
